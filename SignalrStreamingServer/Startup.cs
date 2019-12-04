@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SignalrStreamingServer.Hubs;
 
 namespace SignalrStreamingServer
 {
@@ -18,6 +19,7 @@ namespace SignalrStreamingServer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddSignalR();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -36,6 +38,7 @@ namespace SignalrStreamingServer
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<WeatherForecastHub>("/weather");
             });
         }
     }
