@@ -1,29 +1,22 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using System;
 using System.Collections.Generic;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Linq;
+using SignalrStreamingServer.Services;
 
 namespace SignalrStreamingServer.Hubs
 {
     public class WeatherForecastHub : Hub
     {
-        private static readonly BehaviorSubject<int> _values = new BehaviorSubject<int>(0);
-        private static readonly Random _random = new Random();
+        private readonly RealtimeValuesService _realtimeValuesService;
 
-        static WeatherForecastHub()
+        public WeatherForecastHub(RealtimeValuesService realtimeValuesService)
         {
-            Observable.Interval(TimeSpan.FromSeconds(1)).Subscribe(_ =>
-            {
-                int value = (int)(_random.NextDouble() * 30);
-                _values.OnNext(value);
-            });
+            _realtimeValuesService = realtimeValuesService;
         }
 
         public IAsyncEnumerable<int> RealtimeWeather()
         {
-            return _values.ToAsyncEnumerable();
+            return _realtimeValuesService.Observe().ToAsyncEnumerable();
         }
     }
 }

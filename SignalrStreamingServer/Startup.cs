@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SignalrStreamingServer.Hubs;
+using SignalrStreamingServer.Services;
 
 namespace SignalrStreamingServer
 {
@@ -20,6 +21,8 @@ namespace SignalrStreamingServer
         {
             services.AddControllers();
             services.AddSignalR();
+
+            services.AddSingleton<RealtimeValuesService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
