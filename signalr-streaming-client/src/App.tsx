@@ -1,13 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import './App.css';
-import { HubConnectionBuilder, HttpTransportType, HubConnection } from '@microsoft/signalr';
-import { Subject, interval } from 'rxjs';
-import { map, filter } from 'rxjs/operators';
+import { HubConnectionBuilder, HttpTransportType, HubConnection, IHttpConnectionOptions, LogLevel } from '@microsoft/signalr';
+import { Observable } from 'rxjs';
+import { share } from 'rxjs/operators';
 
 const fromStream = <T extends any>(connection: HubConnection, streamName: string, ...args: any[]) => {
-  const subject = new Subject<T>();
-  connection.stream(streamName, ...args).subscribe(subject);
-  return subject.asObservable();
+  return new Observable<T>(
+    observer => {
+      const stream = connection.stream(streamName, ...args)
+      const subscription = stream.subscribe(observer);
+
+      return () => subscription.dispose();
+    }
+  ).pipe(
+    share()
+  );
 };
 
 const App: React.FC = () => {
@@ -16,8 +23,9 @@ const App: React.FC = () => {
   useEffect(() => {
     const hubOptions = {
       skipNegotiation: true,
-      transport: HttpTransportType.WebSockets
-    };
+      transport: HttpTransportType.WebSockets,
+      logger: LogLevel.Trace
+    } as IHttpConnectionOptions;
 
     const connection = new HubConnectionBuilder()
       .withUrl("https://localhost:44308/weather", hubOptions)
@@ -25,16 +33,8 @@ const App: React.FC = () => {
 
     connection.start()
       .then(() => {
-        const subscription = fromStream<number>(connection, "realtimeWeather")
+        fromStream<number>(connection, "realtimeWeather")
           .subscribe(value => setWeather(value));
-
-        // random unsubscription
-        interval(1000).pipe(
-          map(_ => Math.random() * 100),
-          filter(x => x > 90)
-        ).subscribe(_ => {
-          subscription.unsubscribe();
-        })
       });
   }, []);
 
