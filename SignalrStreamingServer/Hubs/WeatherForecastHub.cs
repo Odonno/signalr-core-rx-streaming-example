@@ -1,10 +1,14 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using System.Collections.Generic;
-using System.Linq;
+using SignalrStreamingServer.Extensions;
 using SignalrStreamingServer.Services;
+using System.Threading.Channels;
 
 namespace SignalrStreamingServer.Hubs
 {
+    public static class ObservableExtensions
+    {
+    }
+
     public class WeatherForecastHub : Hub
     {
         private readonly RealtimeValuesService _realtimeValuesService;
@@ -14,9 +18,10 @@ namespace SignalrStreamingServer.Hubs
             _realtimeValuesService = realtimeValuesService;
         }
 
-        public IAsyncEnumerable<int> RealtimeWeather()
+        public ChannelReader<int> RealtimeWeather()
         {
-            return _realtimeValuesService.Observe().ToAsyncEnumerable();
+            return _realtimeValuesService.Observe()
+                .ToNewestValueStream(Context.ConnectionAborted);
         }
     }
 }

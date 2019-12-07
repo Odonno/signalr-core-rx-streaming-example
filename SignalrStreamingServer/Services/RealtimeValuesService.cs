@@ -11,11 +11,9 @@ namespace SignalrStreamingServer.Services
 
         public RealtimeValuesService()
         {
-            Observable.Interval(TimeSpan.FromSeconds(1)).Subscribe(_ =>
-            {
-                int value = (int)(_random.NextDouble() * 30);
-                _values.OnNext(value);
-            });
+            Observable.Interval(TimeSpan.FromSeconds(1))
+                .Select(_ => (int)(_random.NextDouble() * 30))
+                .Subscribe(_values);
         }
 
         public IObservable<int> Observe()
