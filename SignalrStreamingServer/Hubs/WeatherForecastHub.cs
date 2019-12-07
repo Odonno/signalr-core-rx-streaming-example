@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using SignalrStreamingServer.Extensions;
+using RxSignalrStreams.Extensions;
 using SignalrStreamingServer.Services;
 using System.Threading.Channels;
 
